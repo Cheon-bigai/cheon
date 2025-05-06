@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h1 class="display-4">ODIR 안구질환 분석 시스템</h1>
+                <p class="lead">안구 이미지를 통해 8가지 안구질환을 분석하는 AI 시스템입니다.</p>
+                <hr>
+                <p>안구 이미지를 업로드하여 즉시 질환 분석 결과를 확인하세요.</p>
+                <a href="/upload" class="btn btn-primary btn-lg">이미지 분석하기</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">데이터 조회</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">데이터베이스에 저장된 안구 이미지 및 진단 데이터를 조회합니다.</p>
+                <a href="/view_data" class="btn btn-primary">데이터 조회하기</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">통계 정보</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">질환별 통계 및 데이터 분포를 시각화하여 확인합니다.</p>
+                <a href="/stats" class="btn btn-primary">통계 보기</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">DB 관리</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">CSV 파일을 데이터베이스에 업로드하거나 DB 설정을 관리합니다.</p>
+                <a href="/db_admin" class="btn btn-primary">DB 관리하기</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">ODIR 프로젝트 소개</h5>
+            </div>
+            <div class="card-body">
+                <p>ODIR(Ocular Disease Intelligent Recognition)은 안구 이미지를 분석하여 다음 8가지 질환을 판별합니다:</p>
+                <ul>
+                    <li><strong>정상 (Normal)</strong>: 특별한 질환이 없는 정상 안구</li>
+                    <li><strong>당뇨병 (Diabetes)</strong>: 당뇨로 인한 망막병증</li>
+                    <li><strong>녹내장 (Glaucoma)</strong>: 안압 상승으로 인한 시신경 손상</li>
+                    <li><strong>백내장 (Cataract)</strong>: 눈의 수정체가 혼탁해지는 질환</li>
+                    <li><strong>AMD</strong>: 노화성 황반변성</li>
+                    <li><strong>고혈압 (Hypertension)</strong>: 고혈압으로 인한 망막병증</li>
+                    <li><strong>근시 (Myopia)</strong>: 병적 근시로 인한 안구 변화</li>
+                    <li><strong>기타 (Other)</strong>: 기타 안구 질환</li>
+                </ul>
+                <p>이 시스템은 딥러닝 기술을 활용하여 안구 이미지를 분석하고, 각 질환에 대한 확률을 계산합니다.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
