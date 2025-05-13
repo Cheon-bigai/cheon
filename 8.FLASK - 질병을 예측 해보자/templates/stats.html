@@ -1,0 +1,226 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h3>데이터 통계</h3>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger">
+                    <strong>오류:</strong> {{ error }}
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    데이터베이스에 총 <strong>{{ total|default('0') }}</strong>개의 레코드가 있습니다.
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>질환별 분포</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>질환</th>
+                                    <th>레코드 수</th>
+                                    <th>비율</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for disease in disease_names %}
+                                <tr>
+                                    <td>{{ disease }}</td>
+                                    <td>{{ disease_stats[disease]|default('0') }}</td>
+                                    <td>{{ "%.2f"|format((disease_stats[disease]|default('0') / total|default('1')) * 100) }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <canvas id="diseaseChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <h5>질환 분포 히트맵</h5>
+                        <canvas id="heatmapChart" width="800" height="300"></canvas>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>데이터 분석</h5>
+            </div>
+            <div class="card-body">
+                <h6>질환별 특징</h6>
+                <ul>
+                    <li><strong>Normal (정상)</strong>: 특별한 질환이 발견되지 않은 안구</li>
+                    <li><strong>Diabetes (당뇨병성 망막병증)</strong>: 당뇨병으로 인해 망막의 혈관이 손상되는 질환</li>
+                    <li><strong>Glaucoma (녹내장)</strong>: 안압이 상승하여 시신경이 손상되는 질환</li>
+                    <li><strong>Cataract (백내장)</strong>: 눈의 수정체가 혼탁해지는 질환</li>
+                    <li><strong>AMD (노화성 황반변성)</strong>: 황반 부위가 노화로 인해 손상되는 질환</li>
+                    <li><strong>Hypertension (고혈압성 망막병증)</strong>: 고혈압으로 인해 망막의 혈관이 손상되는 질환</li>
+                    <li><strong>Myopia (병적 근시)</strong>: 심한 근시로 인한 망막의 변화</li>
+                    <li><strong>Other (기타 질환)</strong>: 위 질환에 포함되지 않는 기타 안구 질환</li>
+                </ul>
+                
+                <h6 class="mt-3">데이터 분석 결과</h6>
+                <p>이 데이터셋은 안구 이미지를 통해 다양한 안구 질환을 진단하기 위한 것으로, 각 환자는 여러 질환을 동시에 가질 수 있습니다.</p>
+                <p>질환별 분포를 통해 가장 흔한 질환과 드문 질환을 파악할 수 있으며, 이는 진단 모델의 불균형 데이터 문제를 해결하는 데 도움이 됩니다.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if not error %}
+    // 질환별 분포 차트
+    const ctx = document.getElementById('diseaseChart').getContext('2d');
+    
+    // 차트 데이터 준비
+    const diseaseNames = {{ disease_names|tojson }};
+    const diseaseCounts = diseaseNames.map(disease => {{ disease_stats|tojson }}[disease] || 0);
+    
+    // 차트 색상 설정
+    const backgroundColors = [
+        'rgba(75, 192, 192, 0.6)',   // 정상
+        'rgba(255, 99, 132, 0.6)',   // 당뇨병
+        'rgba(54, 162, 235, 0.6)',   // 녹내장
+        'rgba(255, 206, 86, 0.6)',   // 백내장
+        'rgba(153, 102, 255, 0.6)',  // AMD
+        'rgba(255, 159, 64, 0.6)',   // 고혈압
+        'rgba(199, 199, 199, 0.6)',  // 근시
+        'rgba(83, 102, 255, 0.6)'    // 기타
+    ];
+    
+    // 차트 생성
+    const diseaseChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: diseaseNames,
+            datasets: [{
+                label: '질환별 데이터 수',
+                data: diseaseCounts,
+                backgroundColor: backgroundColors,
+                borderColor: backgroundColors.map(color => color.replace('0.6', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '질환별 분포',
+                    font: {
+                        size: 16
+                    }
+                },
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+    
+    // 히트맵 차트 (더미 데이터)
+    const heatmapCtx = document.getElementById('heatmapChart').getContext('2d');
+    
+    try {
+        // 더미 데이터 - 실제로는 DB에서 가져와야 함
+        const heatmapData = {
+            'Normal': { 'Diabetes': 12, 'Glaucoma': 8, 'Cataract': 15, 'AMD': 5, 'Hypertension': 18, 'Myopia': 10, 'Other': 3 },
+            'Diabetes': { 'Normal': 12, 'Glaucoma': 20, 'Cataract': 30, 'AMD': 15, 'Hypertension': 45, 'Myopia': 8, 'Other': 5 },
+            'Glaucoma': { 'Normal': 8, 'Diabetes': 20, 'Cataract': 12, 'AMD': 7, 'Hypertension': 9, 'Myopia': 14, 'Other': 2 },
+            'Cataract': { 'Normal': 15, 'Diabetes': 30, 'Glaucoma': 12, 'AMD': 10, 'Hypertension': 25, 'Myopia': 18, 'Other': 4 },
+            'AMD': { 'Normal': 5, 'Diabetes': 15, 'Glaucoma': 7, 'Cataract': 10, 'Hypertension': 12, 'Myopia': 3, 'Other': 1 },
+            'Hypertension': { 'Normal': 18, 'Diabetes': 45, 'Glaucoma': 9, 'Cataract': 25, 'AMD': 12, 'Myopia': 7, 'Other': 3 },
+            'Myopia': { 'Normal': 10, 'Diabetes': 8, 'Glaucoma': 14, 'Cataract': 18, 'AMD': 3, 'Hypertension': 7, 'Other': 2 },
+            'Other': { 'Normal': 3, 'Diabetes': 5, 'Glaucoma': 2, 'Cataract': 4, 'AMD': 1, 'Hypertension': 3, 'Myopia': 2 }
+        };
+        
+        // 히트맵 데이터 준비
+        const heatmapLabels = diseaseNames;
+        const heatmapDatasets = [];
+        
+        heatmapLabels.forEach((rowLabel, index) => {
+            const data = [];
+            heatmapLabels.forEach(colLabel => {
+                // 같은 질환은 0으로 처리
+                if (rowLabel === colLabel) {
+                    data.push(0);
+                } else {
+                    // 실제 데이터 또는 더미 데이터 사용
+                    data.push(heatmapData[rowLabel][colLabel] || 0);
+                }
+            });
+            
+            heatmapDatasets.push({
+                label: rowLabel,
+                data: data,
+                backgroundColor: backgroundColors[index],
+                borderColor: backgroundColors[index].replace('0.6', '1'),
+                borderWidth: 1
+            });
+        });
+        
+        // 히트맵 차트 생성 (막대 그래프로 대체)
+        const heatmapChart = new Chart(heatmapCtx, {
+        type: 'bar',
+        data: {
+            labels: heatmapLabels,
+            datasets: heatmapDatasets
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: '질환'
+                    }
+                },
+                y: {
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: '공존 횟수'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: '질환간 공존 관계',
+                    font: {
+                        size: 16
+                    }
+                },
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+});
+    } catch(error) {
+        console.error('히트맵 차트 생성 중 오류 발생:', error);
+    }
+{% endif %}
+});
+</script>
+{% endblock %}
